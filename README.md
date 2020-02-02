@@ -1,5 +1,7 @@
 # 根据贵州冠状肺炎疫情制作的大屏展示
 
+# 大屏展示数据由后端提供
+
 # epidemic-prevention
 
 ## Project setup
