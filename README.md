@@ -1,2 +1,0 @@
-# epidemic-prevention
-vue-epidemic
