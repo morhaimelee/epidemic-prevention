@@ -36,31 +36,31 @@
         <ol class="case-text">
           <li>
             公开新增确诊病例
-            <span>相比昨日增加人数：1人</span>
+            <span>相比昨日增加人数：{{dataList.openData.openCompare[0]}}人</span>
           </li>
           <li>
             公开治愈案例
-            <span>相比昨日增加人数：1人</span>
+            <span>相比昨日增加人数：{{dataList.openData.openCompare[1]}}人</span>
           </li>
           <li>
             公开死亡案例
-            <span>相比昨日增加人数：1人</span>
+            <span>相比昨日增加人数：{{dataList.openData.openCompare[2]}}人</span>
           </li>
         </ol>
         <ul class="case-bar">
           <li>
-            <i></i>
-            <span>7</span>
+            <i v-bind:style="{width: dataList.openData.openPatients[0] / 10 * 100 + '%'}"></i>
+            <span>{{dataList.openData.openPatients[0]}}</span>
             <s>人</s>
           </li>
           <li>
-            <i></i>
-            <span>5</span>
+            <i v-bind:style="{width: dataList.openData.openPatients[1] / 10 * 100 + '%'}"></i>
+            <span>{{dataList.openData.openPatients[1]}}</span>
             <s>人</s>
           </li>
           <li>
-            <i></i>
-            <span>1</span>
+            <i v-bind:style="{width: dataList.openData.openPatients[2] / 10 * 100 + '%'}"></i>
+            <span>{{dataList.openData.openPatients[2]}}</span>
             <s>人</s>
           </li>
         </ul>
@@ -163,12 +163,23 @@
 import echarts from "echarts";
 import JSON from "./assets/520100.json";
 // import JSON from "./assets/chongqing.json";
+import axios from 'axios'
 
 export default {
   name: "guiyangyiqing",
 
   data() {
     return {
+      // openData: {
+      //   openPatients: ["7", "3", "1"], //公开确诊、治愈、死亡
+      //   openCompare: ["2", "1", "1"] //相比昨日增加人数
+      // },
+      dataList: {
+        openData: {
+          openPatients: [],
+          openCompare: []
+        }
+      },
       nowTime: "", //当前时间
       nowWeek: "", //当前星期
       nowDate: "", //当前日期
@@ -185,6 +196,19 @@ export default {
             fontWeight: 300,
             color: "#b6d7ff"
           }
+        },
+        tooltip: {
+          formatter: params => {
+            return (
+              `<div class="map_tooltip">` +
+              params.name +
+              "</br>确诊人数&nbsp;" +
+              params.value +
+              `</div>`
+            );
+            console.log(this.params.value);
+          },
+          textStyle: { color: "#fff", fontSize: "16" }
         },
         legend: {
           orient: "vertical",
@@ -213,11 +237,9 @@ export default {
           splitNumber: 5,
           inRange: {
             color: [
-              "#FACD91",
-              "#74DFB2",
-              "#81D3F8",
-              "#768FDE",
-              "#e9969f"
+              "rgb(9,192,255)",
+              "rgb(9,168,255)",
+              "rgb(9,143,255)"
             ].reverse()
           },
           textStyle: {
@@ -231,24 +253,25 @@ export default {
             normal: {
               // 设置字体相关信息
               show: true,
-              color: "#000"
+              color: "#fff",
+              fontSize: "16"
             },
             emphasis: {
               // 设置鼠标移上去hover效果
               show: true,
-              color: "#fff"
+              color: "#000"
             }
           },
           roam: false,
           itemStyle: {
             // 设置地图块的相关显示信息
             normal: {
-              areaColor: "#8db200",
+              areaColor: "rgb(9,192,255)",
               borderColor: "#6367ad",
               borderWidth: 1
             },
             emphasis: {
-              areaColor: "#feb6aa" // hover效果
+              areaColor: "#3093d8" // hover效果
             }
           },
           left: "5%",
@@ -262,18 +285,35 @@ export default {
             name: "年度总项目数据查询",
             type: "map",
             geoIndex: 0, // 不可缺少，否则无tooltip 指示效果
-            data: [{
-                  name: '渝北区',
-                  value: 18
-                },
-                {
-                  name: '江北区',
-                  value: 16
-                },
-                {
-                  name: '万州区',
-                  value: 6
-                }],
+            zoom: 1,
+            label: {
+              normal: {
+                show: true,
+                textStyle: {
+                  color: "#fff",
+                  fontSize: "16"
+                }
+              },
+              emphasis: {
+                show: true,
+                textStyle: { color: "#fff", fontSize: "16" }
+              }
+            },
+            roam: false,
+            data: [
+              {
+                name: "南明区",
+                value: 18
+              },
+              {
+                name: "云岩区",
+                value: 16
+              },
+              {
+                name: "观山湖区",
+                value: 6
+              }
+            ]
           }
         ]
       }
@@ -281,10 +321,19 @@ export default {
     };
   },
   methods: {
+    getData() {
+      axios.get("/js/data.json").then(response => {
+          console.log(response.data);
+          this.dataList = response.data
+        },response => {
+          console.log("error");
+        }
+      );
+    },
     // 组件的方法
     getTime: function() {
       let myDate = new Date();
-      var _this = this;
+      let _this = this;
       let yy = new Date().getFullYear();
       let mm = new Date().getMonth() + 1;
       let dd = new Date().getDate();
@@ -317,9 +366,9 @@ export default {
     },
     //echarts地图方法
     getOptions() {
-      this.$set(this.option)
+      this.$set(this.option);
       return this.option;
-    },
+    }
   },
   computed: {
     // computed擅长处理的场景：一个数据受多个数据影响
@@ -329,6 +378,7 @@ export default {
   },
   created: function() {
     this.currentTime();
+    this.getData()
     // 实例已经创建完成之后被调用。在这一步，实例已完成以下的配置：数据观测(data observer)，属性和方法的运算， watch/event 事件回调。然而，挂载阶段还没开始，$el 属性目前不可见。
   },
   beforeMount: function() {
@@ -343,6 +393,7 @@ export default {
     this.echartObj = echarts.init(document.getElementById(this.id));
     echarts.registerMap("贵阳", JSON);
     this.echartObj.setOption(this.getOptions(), true);
+    
 
     let fontColor = "#30eee9";
     let options = {
@@ -917,4 +968,8 @@ export default {
       position absolute
       top 180px
       left 620px
+  .map_tooltip
+    width 100px
+    height 50px
+    text-align center
 </style>

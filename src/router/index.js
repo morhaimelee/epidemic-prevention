@@ -4,7 +4,6 @@ import Home from '../views/Home.vue'
 import echarts from 'echarts'
 Vue.prototype.$echarts = echarts
 
-
 Vue.use(VueRouter)
 
 const routes = [
