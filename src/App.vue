@@ -30,36 +30,37 @@
       </div>
       <!-- 人数展示结束 -->
       <div class="title-text">
-        <i></i>贵阳公开数据
+        <i></i>贵阳数据
       </div>
+      <div id="deadline">截止{{dataList.deadline.deadline_date}} {{dataList.deadline.deadline_time}} 全市数据统计</div>
       <div class="guiyang_data">
         <ol class="case-text">
           <li>
-            公开新增确诊病例
-            <span>相比昨日增加人数：{{dataList.openData.openCompare[0]}}人</span>
+            确诊病例
+            <span>较昨日人数：{{dataList.openData.openCompare[0]}}人</span>
           </li>
           <li>
-            公开治愈案例
-            <span>相比昨日增加人数：{{dataList.openData.openCompare[1]}}人</span>
+            治愈案例
+            <span>较昨日人数：{{dataList.openData.openCompare[1]}}人</span>
           </li>
           <li>
-            公开死亡案例
-            <span>相比昨日增加人数：{{dataList.openData.openCompare[2]}}人</span>
+            死亡案例
+            <span>较昨日人数：{{dataList.openData.openCompare[2]}}人</span>
           </li>
         </ol>
         <ul class="case-bar">
           <li>
-            <i v-bind:style="{width: dataList.openData.openPatients[0] / 10 * 100 + '%'}"></i>
+            <i v-bind:style="{width: widthAbs(dataList.openData.openPatients[0])}"></i>
             <span>{{dataList.openData.openPatients[0]}}</span>
             <s>人</s>
           </li>
           <li>
-            <i v-bind:style="{width: dataList.openData.openPatients[1] / 10 * 100 + '%'}"></i>
+            <i v-bind:style="{width: widthAbs(dataList.openData.openPatients[1])}"></i>
             <span>{{dataList.openData.openPatients[1]}}</span>
             <s>人</s>
           </li>
           <li>
-            <i v-bind:style="{width: dataList.openData.openPatients[2] / 10 * 100 + '%'}"></i>
+            <i v-bind:style="{width: widthAbs(dataList.openData.openPatients[2])}"></i>
             <span>{{dataList.openData.openPatients[2]}}</span>
             <s>人</s>
           </li>
@@ -141,6 +142,7 @@ export default {
   props: {},
   data() {
     return {
+      openWidth1: "77%",
       myCharts: "",
       dataList: {
         grandTotal: {},
@@ -154,6 +156,10 @@ export default {
           medicine_date: [],
           medicine_dataNum: [],
           supplies_dataNum: []
+        },
+        deadline: {
+          deadline_date: "",
+          deadline_time: ""
         }
       },
       nowTime: "", //当前时间
@@ -178,7 +184,7 @@ export default {
             return (
               `<div class="map_tooltip">` +
               params.name +
-              "</br>确诊人数&nbsp;" +
+              "</br>重点患者&nbsp;" +
               params.value +
               `</div>`
             );
@@ -208,14 +214,17 @@ export default {
         visualMap: {
           // 设置地图范围值显示的颜色
           min: 0,
-          max: 100,
-          show: false,
-          splitNumber: 5,
+          max: 20,
+          right: '130',
+          bottom: '70',
+          text: ['20','0'],
+          // show: false,
+          // splitNumber: 5,
           inRange: {
             color: [
-              "rgb(9,192,255)",
-              "rgb(9,168,255)",
-              "rgb(9,143,255)"
+              "rgb(288,191,123)",
+              "rgb(11,255,254)",
+              "rgb(9,168,255)"
             ].reverse()
           },
           textStyle: {
@@ -258,7 +267,7 @@ export default {
         series: [
           {
             // 地图块的相关信息
-            name: "年度总项目数据查询",
+            name: "贵州疫情监控",
             type: "map",
             geoIndex: 0, // 不可缺少，否则无tooltip 指示效果
             zoom: 1,
@@ -276,20 +285,7 @@ export default {
               }
             },
             roam: false,
-            data: [
-              {
-                name: "南明区",
-                value: 18
-              },
-              {
-                name: "云岩区",
-                value: 16
-              },
-              {
-                name: "观山湖区",
-                value: 6
-              }
-            ]
+            data: []
           }
         ]
       }
@@ -300,7 +296,7 @@ export default {
     //观察option的变化
     options1: {
       handler(newVal, oldVal) {
-        console.log(newVal, oldVal)
+        console.log(newVal, oldVal);
         if (this.myCharts) {
           if (newVal) {
             this.myCharts.setOption(newVal);
@@ -312,13 +308,33 @@ export default {
         }
       },
       deep: true //对象内部属性的监听，关键。
+    },
+    options2: {
+      handler(newVal, oldVal) {
+        console.log(newVal, oldVal);
+        if (this.myCharts2) {
+          if (newVal) {
+            this.myCharts2.setOption(newVal);
+          } else {
+            this.myCharts2.setOption(oldVal);
+          }
+        } else {
+          this.initChart2();
+        }
+      },
+      deep: true //对象内部属性的监听，关键。
     }
   },
   methods: {
+    widthAbs(event) {
+      event = Math.abs(event / 10 * 100) + "%"
+      return event
+    },
     getData() {
       axios.get("/js/data.json").then(
         response => {
           this.dataList = response.data;
+          console.log(response.data)
           // this.options1.xAxis[0].data = esponse.data.medicinal.medicine_date
           // this.options1.series[0].data = esponse.data.medicinal.medicine_dataNum
         },
@@ -366,9 +382,27 @@ export default {
       this.$set(this.option);
       return this.option;
     },
+    runEchartsmap() {
+      this.echartObj = echarts.init(document.getElementById(this.id));
+      echarts.registerMap("贵阳", JSON);
+      let that = this
+      axios.get("/js/data.json").then(
+        response => {
+          // console.log(response.data);
+          this.option.series[0].data = response.data.map_data_person;
+          // options1.series[0].data = response.data.medicinal.medicine_dataNum;
+          // options1.series[1].data = response.data.medicinal.supplies_dataNum;
+          that.echartObj.setOption(this.getOptions(), true);
+        },
+        response => {
+          console.log("error");
+        }
+      );
+      // this.echartObj.setOption(this.getOptions(), true);
+    },
     initChart1() {
       const myCharts = this.$echarts.init(this.$refs.myCharts);
-      const options1 = {
+      let options1 = {
         grid: {
           left: "5%",
           right: "10%",
@@ -415,7 +449,7 @@ export default {
                 color: "#195384"
               }
             },
-            data: ["02-01", "02-02", "02-03", "02-04", "02-05", "02-06", "02-07"]
+            data: []
           }
         ],
         yAxis: [
@@ -498,7 +532,7 @@ export default {
                 }
               }
             },
-            data: [120, 132, 101, 134, 90, 230, 210]
+            data: []
           },
           {
             name: "物资",
@@ -519,24 +553,174 @@ export default {
                 }
               }
             },
-            data: [220, 182, 191, 234, 290, 330, 310]
+            data: []
           }
         ]
       };
-      myCharts.setOption(options1, true);
+
       axios.get("/js/data.json").then(
         response => {
           this.dataList = response.data;
-          console.log(options1);
-          console.log(response.data.medicinal.medicine_date)
+          // console.log(options1);
           options1.xAxis[0].data = response.data.medicinal.medicine_date;
           options1.series[0].data = response.data.medicinal.medicine_dataNum;
           options1.series[1].data = response.data.medicinal.supplies_dataNum;
+          myCharts.setOption(options1, true);
         },
         response => {
           console.log("error");
         }
       );
+    },
+    initChart2() {
+      const myCharts2 = this.$echarts.init(this.$refs.myCharts2);
+      // 左下折线图结束
+      let options2 = {
+        tooltip: {
+          trigger: "axis",
+          axisPointer: {
+            type: "shadow"
+          }
+        },
+        legend: {
+          data: ["发热人数", "疑似人数", "重点患者"],
+          align: "left",
+          right: 50,
+          top: 10,
+          textStyle: {
+            color: "#fff",
+            fontSize: "18"
+          },
+          itemWidth: 22,
+          itemHeight: 10,
+          itemGap: 35
+        },
+        grid: {
+          left: "3%",
+          right: "4%",
+          bottom: "3%",
+          containLabel: true
+        },
+        xAxis: [
+          {
+            type: "category",
+            name: "日期",
+            data: [
+              "02-01",
+              "02-02",
+              "02-03",
+              "02-04",
+              "02-05",
+              "02-06",
+              "02-07"
+            ],
+            axisLine: {
+              show: true,
+              lineStyle: {
+                color: "#E4FAFF",
+                width: 1,
+                type: "solid"
+              }
+            },
+            axisTick: {
+              show: false
+            },
+            axisLabel: {
+              show: true,
+              textStyle: {
+                color: "#E4FAFF",
+                fontSize: "16"
+              }
+            }
+          }
+        ],
+        yAxis: [
+          {
+            type: "value",
+            name: "人数",
+            axisLabel: {
+              formatter: "{value} "
+            },
+            axisTick: {
+              show: false
+            },
+            axisLine: {
+              show: false,
+              lineStyle: {
+                color: "#E4FAFF",
+                width: 1,
+                type: "solid"
+              }
+            },
+            axisLabel: {
+              show: true,
+              textStyle: {
+                color: "#E4FAFF",
+                fontSize: "16"
+              }
+            },
+            splitLine: {
+              lineStyle: {
+                color: "#063374"
+              }
+            }
+          }
+        ],
+        series: [
+          {
+            name: "发热人数",
+            type: "bar",
+            data: [],
+            barWidth: 20, //柱子宽度
+            barGap: 0.5, //柱子之间间距
+            itemStyle: {
+              normal: {
+                color: "rgb(9,168,255)"
+              }
+            }
+          },
+          {
+            name: "疑似人数",
+            type: "bar",
+            data: [],
+            barWidth: 20,
+            barGap: 0.5,
+            itemStyle: {
+              normal: {
+                color: "rgb(7,107,253)"
+              }
+            }
+          },
+          {
+            name: "重点患者",
+            type: "bar",
+            data: [],
+            barWidth: 20,
+            barGap: 0.5,
+            itemStyle: {
+              normal: {
+                color: "rgb(10,255,254)"
+              }
+            }
+          }
+        ]
+      };
+      axios.get("/js/data.json").then(
+        response => {
+          this.dataList = response.data;
+          // console.log(options2);
+          options2.series[0].data = response.data.dailyStatistics.fever_person;
+          options2.series[1].data =
+            response.data.dailyStatistics.suspect_person;
+          options2.series[2].data =
+            response.data.dailyStatistics.key_sick_person;
+          myCharts2.setOption(options2, true);
+        },
+        response => {
+          console.log("error");
+        }
+      );
+      // 底部echarts结束
     }
   },
   computed: {
@@ -555,141 +739,14 @@ export default {
     // 在挂载开始之前被调用：相关的 render 函数首次被调用。
   },
   mounted: function() {
+    // this.open_width1 = widthAbs(dataList.openData.openPatients[0] / 10 * 100 + '%')
     this.initChart1();
+    this.initChart2();
+    this.runEchartsmap();
     // 编译好的HTML挂载到页面完成后执行的事件钩子
     // el 被新创建的 vm.$el 替换，并挂载到实例上去之后调用该钩子。
     // 此钩子函数中一般会做一些ajax请求获取数据进行数据初始化
     // console.log(JSON.parse(this.dataList))
-    const myCharts2 = this.$echarts.init(this.$refs.myCharts2);
-    this.echartObj = echarts.init(document.getElementById(this.id));
-    echarts.registerMap("贵阳", JSON);
-    this.echartObj.setOption(this.getOptions(), true);
-
-    // 左下折线图结束
-    let options2 = {
-      tooltip: {
-        trigger: "axis",
-        axisPointer: {
-          type: "shadow"
-        }
-      },
-      legend: {
-        data: ["发热人数", "疑似人数", "重点患者"],
-        align: "left",
-        right: 50,
-        top: 10,
-        textStyle: {
-          color: "#fff",
-          fontSize: "18"
-        },
-        itemWidth: 22,
-        itemHeight: 10,
-        itemGap: 35
-      },
-      grid: {
-        left: "3%",
-        right: "4%",
-        bottom: "3%",
-        containLabel: true
-      },
-      xAxis: [
-        {
-          type: "category",
-          name: "日期",
-          data: ["02-01", "02-02", "02-03", "02-04", "02-05", "02-06", "02-07"],
-          axisLine: {
-            show: true,
-            lineStyle: {
-              color: "#E4FAFF",
-              width: 1,
-              type: "solid"
-            }
-          },
-          axisTick: {
-            show: false
-          },
-          axisLabel: {
-            show: true,
-            textStyle: {
-              color: "#E4FAFF",
-              fontSize: "16"
-            }
-          }
-        }
-      ],
-      yAxis: [
-        {
-          type: "value",
-          name: "人数",
-          axisLabel: {
-            formatter: "{value} "
-          },
-          axisTick: {
-            show: false
-          },
-          axisLine: {
-            show: false,
-            lineStyle: {
-              color: "#E4FAFF",
-              width: 1,
-              type: "solid"
-            }
-          },
-          axisLabel: {
-            show: true,
-            textStyle: {
-              color: "#E4FAFF",
-              fontSize: "16"
-            }
-          },
-          splitLine: {
-            lineStyle: {
-              color: "#063374"
-            }
-          }
-        }
-      ],
-      series: [
-        {
-          name: "发热人数",
-          type: "bar",
-          data: [20, 50, 80, 58, 63, 68, 57, 50, 42, 66],
-          barWidth: 20, //柱子宽度
-          barGap: 0.5, //柱子之间间距
-          itemStyle: {
-            normal: {
-              color: "rgb(9,168,255)"
-            }
-          }
-        },
-        {
-          name: "疑似人数",
-          type: "bar",
-          data: [50, 20, 30, 21, 35, 47, 30, 42, 26, 26],
-          barWidth: 20,
-          barGap: 0.5,
-          itemStyle: {
-            normal: {
-              color: "rgb(7,107,253)"
-            }
-          }
-        },
-        {
-          name: "重点患者",
-          type: "bar",
-          data: [1, 2, 3, 5, 8, 10, 15, 3, 2, 4],
-          barWidth: 20,
-          barGap: 0.5,
-          itemStyle: {
-            normal: {
-              color: "rgb(10,255,254)"
-            }
-          }
-        }
-      ]
-    };
-    myCharts2.setOption(options2);
-    // 底部echarts结束
 
     console.log("Home done");
   },
@@ -984,4 +1041,8 @@ export default {
     width 100px
     height 50px
     text-align center
+  #deadline
+    position absolute
+    top 115px
+    left 250px
 </style>
