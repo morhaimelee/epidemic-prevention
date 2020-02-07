@@ -1,11 +1,31 @@
 {
+  "grandTotal": {
+    "heat_person": 3020,
+    "sickKey_person": 3,
+    "suspect_person": 10
+  },
   "openData": {
     "openPatients": ["7", "3", "1"],
     "openCompare": ["2", "1", "1"]
   },
-  "first":[
-      {"name":"王小婷","nick":"祈澈菇凉"},
-      {"name":"安安","nick":"坏兔子"},
-      {"name":"编程微刊","nick":"简书"}
-  ]
+  "sampleData": {
+    "accept": 282,
+    "detection": 252,
+    "positive": 83,
+    "negtive": 622,
+    "stay_out": 82,
+    "others": 626
+  },
+  "keyPatient":[
+      {"name":"王*婷","sex":"男","age": 78,"phone_num": "186****0892","confirmed_date": "2020/02/02"},
+      {"name":"赵*楠","sex":"男","age": 78,"phone_num": "186****0892","confirmed_date": "2020/02/02"},
+      {"name":"郭*婷","sex":"女","age": 78,"phone_num": "186****0892","confirmed_date": "2020/02/02"},
+      {"name":"安*安","sex":"女","age": 78,"phone_num": "186****0892","confirmed_date": "2020/02/02"},
+      {"name":"张*三","sex":"男","age": 78,"phone_num": "186****0892","confirmed_date": "2020/02/02"}
+  ],
+  "medicinal": {
+    "medicine_date": ["02-01", "02-02", "02-03", "02-04", "02-05", "02-06", "02-07"],
+    "medicine_dataNum": [120, 132, 101, 134, 90, 230, 210],
+    "supplies_dataNum": [220, 182, 191, 234, 290, 330, 310]
+  }
 }

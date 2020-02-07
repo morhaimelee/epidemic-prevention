@@ -17,15 +17,15 @@
       <div id="mid_three">
         <div class="mid-box" id="mid_1">
           <div class="mid-text">累计发热人数</div>
-          <div class="mid-num-box">3.333.546</div>
+          <div class="mid-num-box">{{dataList.grandTotal.heat_person}}</div>
         </div>
         <div class="mid-box" id="mid_2">
           <div class="mid-text">累计重点患者</div>
-          <div class="mid-num-box">46</div>
+          <div class="mid-num-box">{{dataList.grandTotal.sickKey_person}}</div>
         </div>
         <div class="mid-box" id="mid_3">
           <div class="mid-text">累计疑似人数</div>
-          <div class="mid-num-box">8546</div>
+          <div class="mid-num-box">{{dataList.grandTotal.suspect_person}}</div>
         </div>
       </div>
       <!-- 人数展示结束 -->
@@ -80,25 +80,25 @@
       <div class="epidemic-data">
         <div class="sample">
           <div>接受样本数量</div>
-          <div>283</div>
+          <div>{{dataList.sampleData.accept}}</div>
           <div>检测样本数量</div>
-          <div>252</div>
+          <div>{{dataList.sampleData.detection}}</div>
         </div>
         <div class="res-i positive">
           阳性人数
-          <i>83</i>
+          <i>{{dataList.sampleData.positive}}</i>
         </div>
         <div class="res-i pos-2">
           待出结果
-          <i class="i-2">83</i>
+          <i class="i-2">{{dataList.sampleData.stay_out}}</i>
         </div>
         <div class="res-i negative">
           阴性人数
-          <i>624</i>
+          <i>{{dataList.sampleData.negtive}}</i>
         </div>
         <div class="res-i neg-2">
           其他流感
-          <i class="i-2">624</i>
+          <i class="i-2">{{dataList.sampleData.others}}</i>
         </div>
       </div>
       <!-- 样本结束 -->
@@ -106,40 +106,12 @@
         <div class="patient-title">最新重点患者</div>
         <div class="patient-list">
           <ul>
-            <li>
-              <span>张某欧</span>
-              <span class="sex">男</span>
-              <span class="age">27</span>
-              <span class="phone-num">186****8080</span>
-              <span class="date-sicken">2020/02/02</span>
-            </li>
-            <li>
-              <span>张某欧</span>
-              <span class="sex">男</span>
-              <span class="age">27</span>
-              <span class="phone-num">186****8080</span>
-              <span class="date-sicken">2020/02/02</span>
-            </li>
-            <li>
-              <span>张某欧</span>
-              <span class="sex">男</span>
-              <span class="age">27</span>
-              <span class="phone-num">186****8080</span>
-              <span class="date-sicken">2020/02/02</span>
-            </li>
-            <li>
-              <span>张某欧</span>
-              <span class="sex">男</span>
-              <span class="age">27</span>
-              <span class="phone-num">186****8080</span>
-              <span class="date-sicken">2020/02/02</span>
-            </li>
-            <li>
-              <span>张某欧</span>
-              <span class="sex">男</span>
-              <span class="age">27</span>
-              <span class="phone-num">186****8080</span>
-              <span class="date-sicken">2020/02/02</span>
+            <li v-for="item in dataList.keyPatient">
+              <span>{{item.name}}</span>
+              <span class="sex">{{item.sex}}</span>
+              <span class="age">{{item.age}}</span>
+              <span class="phone-num">{{item.phone_num}}</span>
+              <span class="date-sicken">{{item.confirmed_date}}</span>
             </li>
           </ul>
         </div>
@@ -162,22 +134,26 @@
 <script>
 import echarts from "echarts";
 import JSON from "./assets/520100.json";
-// import JSON from "./assets/chongqing.json";
-import axios from 'axios'
+import axios from "axios";
 
 export default {
   name: "guiyangyiqing",
-
+  props: {},
   data() {
     return {
-      // openData: {
-      //   openPatients: ["7", "3", "1"], //公开确诊、治愈、死亡
-      //   openCompare: ["2", "1", "1"] //相比昨日增加人数
-      // },
+      myCharts: "",
       dataList: {
+        grandTotal: {},
         openData: {
           openPatients: [],
           openCompare: []
+        },
+        sampleData: {},
+        keyPatient: [],
+        medicinal: {
+          medicine_date: [],
+          medicine_dataNum: [],
+          supplies_dataNum: []
         }
       },
       nowTime: "", //当前时间
@@ -320,12 +296,33 @@ export default {
       //option结束
     };
   },
+  watch: {
+    //观察option的变化
+    options1: {
+      handler(newVal, oldVal) {
+        console.log(newVal, oldVal)
+        if (this.myCharts) {
+          if (newVal) {
+            this.myCharts.setOption(newVal);
+          } else {
+            this.myCharts.setOption(oldVal);
+          }
+        } else {
+          this.initChart1();
+        }
+      },
+      deep: true //对象内部属性的监听，关键。
+    }
+  },
   methods: {
     getData() {
-      axios.get("/js/data.json").then(response => {
-          console.log(response.data);
-          this.dataList = response.data
-        },response => {
+      axios.get("/js/data.json").then(
+        response => {
+          this.dataList = response.data;
+          // this.options1.xAxis[0].data = esponse.data.medicinal.medicine_date
+          // this.options1.series[0].data = esponse.data.medicinal.medicine_dataNum
+        },
+        response => {
           console.log("error");
         }
       );
@@ -368,6 +365,178 @@ export default {
     getOptions() {
       this.$set(this.option);
       return this.option;
+    },
+    initChart1() {
+      const myCharts = this.$echarts.init(this.$refs.myCharts);
+      const options1 = {
+        grid: {
+          left: "5%",
+          right: "10%",
+          top: "20%",
+          bottom: "15%",
+          containLabel: true
+        },
+        tooltip: {
+          show: true,
+          trigger: "item"
+        },
+        legend: {
+          show: true,
+          x: "center",
+          y: "35",
+          icon: "stack",
+          itemWidth: 22,
+          itemHeight: 10,
+          textStyle: {
+            color: "#E4FAFF",
+            fontSize: "18"
+          },
+          data: ["药品", "物资"]
+        },
+        xAxis: [
+          {
+            type: "category",
+            boundaryGap: false,
+            axisLabel: {
+              color: "#30eee9"
+            },
+            axisLine: {
+              show: true,
+              lineStyle: {
+                color: "#397cbc"
+              }
+            },
+            axisTick: {
+              show: false
+            },
+            splitLine: {
+              show: true,
+              lineStyle: {
+                color: "#195384"
+              }
+            },
+            data: ["02-01", "02-02", "02-03", "02-04", "02-05", "02-06", "02-07"]
+          }
+        ],
+        yAxis: [
+          {
+            type: "value",
+            name: "药品",
+            min: 0,
+            max: 1000,
+            axisLabel: {
+              formatter: "{value}",
+              textStyle: {
+                color: "#2ad1d2"
+              }
+            },
+            axisLine: {
+              lineStyle: {
+                color: "#27b4c2"
+              }
+            },
+            axisTick: {
+              show: false
+            },
+            splitLine: {
+              show: true,
+              lineStyle: {
+                color: "#11366e"
+              }
+            }
+          },
+          {
+            type: "value",
+            name: "物资",
+            min: 0,
+            max: 1000,
+            axisLabel: {
+              formatter: "{value} 件",
+              textStyle: {
+                color: "#186afe"
+              }
+            },
+            axisLine: {
+              lineStyle: {
+                color: "#186afe"
+              }
+            },
+            axisTick: {
+              show: false
+            },
+            splitLine: {
+              show: true,
+              lineStyle: {
+                color: "#11366e"
+              }
+            }
+          }
+        ],
+        series: [
+          {
+            name: "药品",
+            type: "line",
+            stack: "总量",
+            symbol: "circle",
+            symbolSize: 8,
+            itemStyle: {
+              normal: {
+                color: "#0092f6",
+                lineStyle: {
+                  color: "#0092f6",
+                  width: 1
+                },
+                areaStyle: {
+                  color: "rgb(12,52,105)"
+                }
+              }
+            },
+            markPoint: {
+              itemStyle: {
+                normal: {
+                  color: "red"
+                }
+              }
+            },
+            data: [120, 132, 101, 134, 90, 230, 210]
+          },
+          {
+            name: "物资",
+            type: "line",
+            stack: "总量",
+            symbol: "circle",
+            symbolSize: 8,
+
+            itemStyle: {
+              normal: {
+                color: "#00d4c7",
+                lineStyle: {
+                  color: "#00d4c7",
+                  width: 1
+                },
+                areaStyle: {
+                  color: "rgb(9,66,94)"
+                }
+              }
+            },
+            data: [220, 182, 191, 234, 290, 330, 310]
+          }
+        ]
+      };
+      myCharts.setOption(options1, true);
+      axios.get("/js/data.json").then(
+        response => {
+          this.dataList = response.data;
+          console.log(options1);
+          console.log(response.data.medicinal.medicine_date)
+          options1.xAxis[0].data = response.data.medicinal.medicine_date;
+          options1.series[0].data = response.data.medicinal.medicine_dataNum;
+          options1.series[1].data = response.data.medicinal.supplies_dataNum;
+        },
+        response => {
+          console.log("error");
+        }
+      );
     }
   },
   computed: {
@@ -378,181 +547,24 @@ export default {
   },
   created: function() {
     this.currentTime();
-    this.getData()
+    this.getData();
+
     // 实例已经创建完成之后被调用。在这一步，实例已完成以下的配置：数据观测(data observer)，属性和方法的运算， watch/event 事件回调。然而，挂载阶段还没开始，$el 属性目前不可见。
   },
   beforeMount: function() {
     // 在挂载开始之前被调用：相关的 render 函数首次被调用。
   },
   mounted: function() {
+    this.initChart1();
     // 编译好的HTML挂载到页面完成后执行的事件钩子
     // el 被新创建的 vm.$el 替换，并挂载到实例上去之后调用该钩子。
     // 此钩子函数中一般会做一些ajax请求获取数据进行数据初始化
-    const myCharts = this.$echarts.init(this.$refs.myCharts);
+    // console.log(JSON.parse(this.dataList))
     const myCharts2 = this.$echarts.init(this.$refs.myCharts2);
     this.echartObj = echarts.init(document.getElementById(this.id));
     echarts.registerMap("贵阳", JSON);
     this.echartObj.setOption(this.getOptions(), true);
-    
 
-    let fontColor = "#30eee9";
-    let options = {
-      grid: {
-        left: "5%",
-        right: "10%",
-        top: "20%",
-        bottom: "15%",
-        containLabel: true
-      },
-      tooltip: {
-        show: true,
-        trigger: "item"
-      },
-      legend: {
-        show: true,
-        x: "center",
-        y: "35",
-        icon: "stack",
-        itemWidth: 22,
-        itemHeight: 10,
-        textStyle: {
-          color: "#E4FAFF",
-          fontSize: "18"
-        },
-        data: ["药品", "物资"]
-      },
-      xAxis: [
-        {
-          type: "category",
-          boundaryGap: false,
-          axisLabel: {
-            color: fontColor
-          },
-          axisLine: {
-            show: true,
-            lineStyle: {
-              color: "#397cbc"
-            }
-          },
-          axisTick: {
-            show: false
-          },
-          splitLine: {
-            show: true,
-            lineStyle: {
-              color: "#195384"
-            }
-          },
-          data: ["02-01", "02-02", "02-03", "02-04", "02-05", "02-06", "02-07"]
-        }
-      ],
-      yAxis: [
-        {
-          type: "value",
-          name: "药品",
-          min: 0,
-          max: 1000,
-          axisLabel: {
-            formatter: "{value}",
-            textStyle: {
-              color: "#2ad1d2"
-            }
-          },
-          axisLine: {
-            lineStyle: {
-              color: "#27b4c2"
-            }
-          },
-          axisTick: {
-            show: false
-          },
-          splitLine: {
-            show: true,
-            lineStyle: {
-              color: "#11366e"
-            }
-          }
-        },
-        {
-          type: "value",
-          name: "物资",
-          min: 0,
-          max: 1000,
-          axisLabel: {
-            formatter: "{value} 件",
-            textStyle: {
-              color: "#186afe"
-            }
-          },
-          axisLine: {
-            lineStyle: {
-              color: "#186afe"
-            }
-          },
-          axisTick: {
-            show: false
-          },
-          splitLine: {
-            show: true,
-            lineStyle: {
-              color: "#11366e"
-            }
-          }
-        }
-      ],
-      series: [
-        {
-          name: "药品",
-          type: "line",
-          stack: "总量",
-          symbol: "circle",
-          symbolSize: 8,
-          itemStyle: {
-            normal: {
-              color: "#0092f6",
-              lineStyle: {
-                color: "#0092f6",
-                width: 1
-              },
-              areaStyle: {
-                color: "rgb(12,52,105)"
-              }
-            }
-          },
-          markPoint: {
-            itemStyle: {
-              normal: {
-                color: "red"
-              }
-            }
-          },
-          data: [120, 132, 101, 134, 90, 230, 210, 182, 191, 234, 290, 330]
-        },
-        {
-          name: "物资",
-          type: "line",
-          stack: "总量",
-          symbol: "circle",
-          symbolSize: 8,
-
-          itemStyle: {
-            normal: {
-              color: "#00d4c7",
-              lineStyle: {
-                color: "#00d4c7",
-                width: 1
-              },
-              areaStyle: {
-                color: "rgb(9,66,94)"
-              }
-            }
-          },
-          data: [220, 182, 191, 234, 290, 330, 310, 201, 154, 190, 330, 410]
-        }
-      ]
-    };
-
-    myCharts.setOption(options);
     // 左下折线图结束
     let options2 = {
       tooltip: {
