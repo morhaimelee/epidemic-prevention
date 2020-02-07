@@ -136,6 +136,7 @@
 import echarts from "echarts";
 import JSON from "./assets/520100.json";
 import axios from "axios";
+document.title = "贵阳市疫情监控平台"
 
 export default {
   name: "guiyangyiqing",
