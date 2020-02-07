@@ -18,17 +18,23 @@
 
 
 *grandTotal -- 累计人数（大屏中上）
+
+
   heat_person -- 累计发热人数
   sickKey_person -- 重点患者
   suspect_person -- 疑似人数
 
 
 *openData -- 贵阳公开数据（大屏左上）
+
+
   openPatients -- 公开确诊、治愈、死亡
   openCompare -- 相比昨日增加人数
 
 
 *sampleData -- 疫情预警管理（大屏右上）
+
+
   accept -- 接受样本数量
   detection -- 检测样本数量
   positive -- 阳性人数
@@ -39,6 +45,8 @@
 
 
 *keyPatient -- 最新重点患者(大屏右侧)
+
+
   _请按照数组顺序来填写字段_
 
 
