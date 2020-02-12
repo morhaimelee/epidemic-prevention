@@ -2,14 +2,12 @@
   <div id="app">
     <div id="all-window">
       <div id="nav">
-        <div class="location">
-          <i></i>贵阳市
-        </div>
+        <div class="location"><i></i>贵阳市</div>
         <div class="calendar">
-          <div class="time">{{nowTime}}</div>
+          <div class="time">{{ nowTime }}</div>
           <div class="dd-date">
-            <div class="week">{{nowWeek}}</div>
-            <div class="date">{{nowDate}}</div>
+            <div class="week">{{ nowWeek }}</div>
+            <div class="date">{{ nowDate }}</div>
           </div>
         </div>
       </div>
@@ -17,59 +15,73 @@
       <div id="mid_three">
         <div class="mid-box" id="mid_1">
           <div class="mid-text">累计发热人数</div>
-          <div class="mid-num-box">{{dataList.grandTotal.heat_person}}</div>
+          <div class="mid-num-box">{{ pub_data.feverNum }}</div>
         </div>
         <div class="mid-box" id="mid_2">
           <div class="mid-text">累计重点患者</div>
-          <div class="mid-num-box">{{dataList.grandTotal.sickKey_person}}</div>
+          <div class="mid-num-box">
+            {{ pub_data.confirmedNum }}
+          </div>
         </div>
         <div class="mid-box" id="mid_3">
           <div class="mid-text">累计疑似人数</div>
-          <div class="mid-num-box">{{dataList.grandTotal.suspect_person}}</div>
+          <div class="mid-num-box">
+            {{ pub_data.suspectedNum }}
+          </div>
         </div>
       </div>
       <!-- 人数展示结束 -->
-      <div class="title-text">
-        <i></i>贵阳数据
+      <div class="title-text"><i></i>贵阳数据</div>
+      <div id="deadline">
+        截止 {{ total_data.releaseDate }} 全市数据统计
       </div>
-      <div id="deadline">截止{{dataList.deadline.deadline_date}} {{dataList.deadline.deadline_time}} 全市数据统计</div>
       <div class="guiyang_data">
         <ol class="case-text">
           <li>
             确诊病例
-            <span>较昨日人数：{{dataList.openData.openCompare[0]}}人</span>
+            <span>较昨日人数： {{ total_data.difconfirmedNum }}人</span>
           </li>
           <li>
             治愈案例
-            <span>较昨日人数：{{dataList.openData.openCompare[1]}}人</span>
+            <span>较昨日人数： {{ total_data.difcureNum }}人</span>
           </li>
           <li>
             死亡案例
-            <span>较昨日人数：{{dataList.openData.openCompare[2]}}人</span>
+            <span>较昨日人数：{{ total_data.difdeathNum }} 人</span>
           </li>
         </ol>
         <ul class="case-bar">
           <li>
-            <i v-bind:style="{width: widthAbs(dataList.openData.openPatients[0])}"></i>
-            <span>{{dataList.openData.openPatients[0]}}</span>
+            <i
+              v-bind:style="{
+                width: widthAbs(total_data.confirmedNum)
+              }"
+            ></i>
+            <span>{{ total_data.confirmedNum }}</span>
             <s>人</s>
           </li>
           <li>
-            <i v-bind:style="{width: widthAbs(dataList.openData.openPatients[1])}"></i>
-            <span>{{dataList.openData.openPatients[1]}}</span>
+            <i
+              v-bind:style="{
+                width: widthAbs(total_data.cureNum)
+              }"
+            ></i>
+            <span>{{ total_data.cureNum }}</span>
             <s>人</s>
           </li>
           <li>
-            <i v-bind:style="{width: widthAbs(dataList.openData.openPatients[2])}"></i>
-            <span>{{dataList.openData.openPatients[2]}}</span>
+            <i
+              v-bind:style="{
+                width: widthAbs(total_data.deathNum)
+              }"
+            ></i>
+            <span>{{ total_data.deathNum }}</span>
             <s>人</s>
           </li>
         </ul>
       </div>
       <!-- 贵阳公开数据结束 -->
-      <div class="title-text" id="drug">
-        <i></i>药品，物资消耗折线图
-      </div>
+      <div class="title-text" id="drug"><i></i>药品，物资消耗折线图</div>
       <div class="durg-data">
         <div id="myCharts" ref="myCharts"></div>
       </div>
@@ -81,25 +93,25 @@
       <div class="epidemic-data">
         <div class="sample">
           <div>接受样本数量</div>
-          <div>{{dataList.sampleData.accept}}</div>
+          <div>{{ warn_data.patientNum }}</div>
           <div>检测样本数量</div>
-          <div>{{dataList.sampleData.detection}}</div>
+          <div>{{ warn_data.testNum }}</div>
         </div>
         <div class="res-i positive">
           阳性人数
-          <i>{{dataList.sampleData.positive}}</i>
+          <i>{{ warn_data.positiveNum }}</i>
         </div>
         <div class="res-i pos-2">
           待出结果
-          <i class="i-2">{{dataList.sampleData.stay_out}}</i>
+          <i class="i-2">{{ warn_data.stayNum }}</i>
         </div>
         <div class="res-i negative">
           阴性人数
-          <i>{{dataList.sampleData.negtive}}</i>
+          <i> {{ warn_data.negativeNum }} </i>
         </div>
         <div class="res-i neg-2">
           其他流感
-          <i class="i-2">{{dataList.sampleData.others}}</i>
+          <i class="i-2">{{ warn_data.otherNum }}</i>
         </div>
       </div>
       <!-- 样本结束 -->
@@ -107,20 +119,18 @@
         <div class="patient-title">最新重点患者</div>
         <div class="patient-list">
           <ul>
-            <li v-for="item in dataList.keyPatient">
-              <span>{{item.name}}</span>
-              <span class="sex">{{item.sex}}</span>
-              <span class="age">{{item.age}}</span>
-              <span class="phone-num">{{item.phone_num}}</span>
-              <span class="date-sicken">{{item.confirmed_date}}</span>
+            <li v-for="item in point_data">
+              <span>{{ item.name }}</span>
+              <span class="sex">{{ item.sex }}</span>
+              <span class="age">{{ item.age }}</span>
+              <span class="phone-num">{{ item.phoneNumber }}</span>
+              <!-- <span class="date-sicken">{{ item.createTime }}</span> -->
             </li>
           </ul>
         </div>
       </div>
       <!-- 重点患者结束 -->
-      <div class="title-text" id="day_of_person">
-        <i></i>每日疫情人数统计
-      </div>
+      <div class="title-text" id="day_of_person"><i></i>每日疫情人数统计</div>
       <div class="statistics-allDay">
         <div id="myCharts2" ref="myCharts2"></div>
       </div>
@@ -136,7 +146,8 @@
 import echarts from "echarts";
 import JSON from "./assets/520100.json";
 import axios from "axios";
-document.title = "贵阳市疫情监控平台"
+axios.defaults.baseURL = 'http://10.81.98.200:8082/em';
+document.title = "贵阳市疫情监控平台";
 
 export default {
   name: "guiyangyiqing",
@@ -145,24 +156,10 @@ export default {
     return {
       openWidth1: "77%",
       myCharts: "",
-      dataList: {
-        grandTotal: {},
-        openData: {
-          openPatients: [],
-          openCompare: []
-        },
-        sampleData: {},
-        keyPatient: [],
-        medicinal: {
-          medicine_date: [],
-          medicine_dataNum: [],
-          supplies_dataNum: []
-        },
-        deadline: {
-          deadline_date: "",
-          deadline_time: ""
-        }
-      },
+      pub_data: {},
+      total_data: {},
+      point_data:{},
+      warn_data: {},
       nowTime: "", //当前时间
       nowWeek: "", //当前星期
       nowDate: "", //当前日期
@@ -216,9 +213,9 @@ export default {
           // 设置地图范围值显示的颜色
           min: 0,
           max: 20,
-          right: '130',
-          bottom: '70',
-          text: ['20','0'],
+          right: "130",
+          bottom: "70",
+          text: ["20", "0"],
           // show: false,
           // splitNumber: 5,
           inRange: {
@@ -328,20 +325,60 @@ export default {
   },
   methods: {
     widthAbs(event) {
-      event = Math.abs(event / 10 * 100) + "%"
-      return event
+      event = Math.abs((event / 10) * 100) + "%";
+      return event;
+    },
+    getTotalData() {
+      return axios.get(
+        "/api/bigscreen/queryPublishData"
+      );
+    },
+    getPubData() {
+      return axios.get(
+        "/api/bigscreen/queryCountNum"
+      );
+    },
+    getGoodsData() {
+      return axios.get(
+        "/api/bigscreen/count7DateGoods"
+      )
+    },
+    getMedsData() {
+      return axios.get(
+        "/api/bigscreen/count7DateMedicine/"
+      )
+    },
+    getdailyData() {
+      return axios.get(
+        "/api/bigscreen/countPatientNumByDay/"
+      )
+    },
+    getwarningData() {
+      return axios.get(
+        "/api/bigscreen/countTreatmentInfo"
+      )
+    },
+    getpointData() {
+      return axios.get(
+        "/api/bigscreen/queryPatientTop"
+      )
+    },
+    getAreaNum() {
+      return axios.get(
+        '/api/bigscreen/queryAreaNum'
+      )
     },
     getData() {
-      axios.get("/js/data.json").then(
-        response => {
-          this.dataList = response.data;
-          console.log(response.data)
-          // this.options1.xAxis[0].data = esponse.data.medicinal.medicine_date
-          // this.options1.series[0].data = esponse.data.medicinal.medicine_dataNum
-        },
-        response => {
-          console.log("error");
-        }
+      let _this = this
+      axios.all([this.getTotalData(), this.getPubData(), this.getwarningData(), this.getpointData()]).then(
+        axios.spread(function(totaldata, pubdata, warndata, pointdata) {
+          console.log("請求都完成了");
+          console.log(totaldata, pubdata, warndata, pointdata)
+          _this.total_data = totaldata.data.result
+          _this.pub_data = pubdata.data.result
+          _this.warn_data = warndata.data.result
+          _this.point_data = pointdata.data.result
+        })
       );
     },
     // 组件的方法
@@ -386,20 +423,19 @@ export default {
     runEchartsmap() {
       this.echartObj = echarts.init(document.getElementById(this.id));
       echarts.registerMap("贵阳", JSON);
-      let that = this
-      axios.get("/js/data.json").then(
+      let that = this;
+      this.getAreaNum().then(
         response => {
-          // console.log(response.data);
-          this.option.series[0].data = response.data.map_data_person;
-          // options1.series[0].data = response.data.medicinal.medicine_dataNum;
-          // options1.series[1].data = response.data.medicinal.supplies_dataNum;
+          console.log(response.data);
+          let arr_map = response.data.result;
+          let area_arr = arr_map.map(arr_map => arr_map.reportedTime)
+          this.option.series[0].data = area_arr;
           that.echartObj.setOption(this.getOptions(), true);
         },
         response => {
           console.log("error");
         }
       );
-      // this.echartObj.setOption(this.getOptions(), true);
     },
     initChart1() {
       const myCharts = this.$echarts.init(this.$refs.myCharts);
@@ -558,24 +594,28 @@ export default {
           }
         ]
       };
-
-      axios.get("/js/data.json").then(
+      this.getGoodsData().then(
         response => {
-          this.dataList = response.data;
-          // console.log(options1);
-          options1.xAxis[0].data = response.data.medicinal.medicine_date;
-          options1.series[0].data = response.data.medicinal.medicine_dataNum;
-          options1.series[1].data = response.data.medicinal.supplies_dataNum;
+          options1.xAxis[0].data = response.data.result.usageDate;
+          // options1.series[0].data = response.data.result.medicine_dataNum;
+          options1.series[1].data = response.data.result.usageNum;
+        },
+        response => {
+          console.log("error");
+        }
+      )
+      this.getMedsData().then(
+        response => {
+          options1.series[0].data = response.data.result.usageNum;
           myCharts.setOption(options1, true);
         },
         response => {
           console.log("error");
         }
-      );
+      )
     },
     initChart2() {
       const myCharts2 = this.$echarts.init(this.$refs.myCharts2);
-      // 左下折线图结束
       let options2 = {
         tooltip: {
           trigger: "axis",
@@ -606,15 +646,7 @@ export default {
           {
             type: "category",
             name: "日期",
-            data: [
-              "02-01",
-              "02-02",
-              "02-03",
-              "02-04",
-              "02-05",
-              "02-06",
-              "02-07"
-            ],
+            data: [],
             axisLine: {
               show: true,
               lineStyle: {
@@ -706,15 +738,17 @@ export default {
           }
         ]
       };
-      axios.get("/js/data.json").then(
+      this.getdailyData().then(
         response => {
-          this.dataList = response.data;
-          // console.log(options2);
-          options2.series[0].data = response.data.dailyStatistics.fever_person;
-          options2.series[1].data =
-            response.data.dailyStatistics.suspect_person;
-          options2.series[2].data =
-            response.data.dailyStatistics.key_sick_person;
+          let arr = response.data.result;
+          let date_arr = arr.map(arr => arr.reportedTime)
+          options2.xAxis[0].data = date_arr
+          let fever_arr = arr.map(arr => arr.feverNum)
+          options2.series[0].data = fever_arr
+          let suspected_arr = arr.map(arr => arr.suspectedNum)
+          options2.series[1].data = suspected_arr
+          let confirmed_arr = arr.map(arr => arr.confirmedNum)
+          options2.series[2].data = confirmed_arr
           myCharts2.setOption(options2, true);
         },
         response => {
@@ -740,7 +774,6 @@ export default {
     // 在挂载开始之前被调用：相关的 render 函数首次被调用。
   },
   mounted: function() {
-    // this.open_width1 = widthAbs(dataList.openData.openPatients[0] / 10 * 100 + '%')
     this.initChart1();
     this.initChart2();
     this.runEchartsmap();
