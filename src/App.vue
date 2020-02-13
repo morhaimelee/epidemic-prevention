@@ -124,7 +124,7 @@
               <span class="sex">{{ item.sex }}</span>
               <span class="age">{{ item.age }}</span>
               <span class="phone-num">{{ item.phoneNumber }}</span>
-              <!-- <span class="date-sicken">{{ item.createTime }}</span> -->
+              <span class="date-sicken">{{ item.createTime }}</span>
             </li>
           </ul>
         </div>
@@ -426,7 +426,6 @@ export default {
       let that = this;
       this.getAreaNum().then(
         response => {
-          console.log(response.data);
           let arr_map = response.data.result;
           let area_arr = arr_map.map(arr_map => arr_map.reportedTime)
           this.option.series[0].data = area_arr;
@@ -596,9 +595,13 @@ export default {
       };
       this.getGoodsData().then(
         response => {
-          options1.xAxis[0].data = response.data.result.usageDate;
+          console.log(response.data)
+          let dategoods = response.data.result;
+          let arr_date = dategoods.map(dategoods => dategoods.usageDate)
+          options1.xAxis[0].data = arr_date
+          let arr_goods = dategoods.map(dategoods => dategoods.usageNum)
           // options1.series[0].data = response.data.result.medicine_dataNum;
-          options1.series[1].data = response.data.result.usageNum;
+          options1.series[1].data = arr_goods
         },
         response => {
           console.log("error");
@@ -606,7 +609,10 @@ export default {
       )
       this.getMedsData().then(
         response => {
-          options1.series[0].data = response.data.result.usageNum;
+          console.log(response.data)
+          let meds = response.data.result;
+          let arr_date = meds.map(meds => meds.usageNum)
+          options1.series[0].data = arr_date
           myCharts.setOption(options1, true);
         },
         response => {
