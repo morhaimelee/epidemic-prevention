@@ -325,8 +325,7 @@ export default {
   },
   methods: {
     widthAbs(event) {
-      event = Math.abs((event / 10) * 100) + "%";
-      return event;
+      return Math.abs(event) < 9 ? Math.abs((event / 11) * 100) + "%" : 82 + "%"
     },
     getTotalData() {
       return axios.get(
