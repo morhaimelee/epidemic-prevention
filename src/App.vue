@@ -146,7 +146,8 @@
 import echarts from "echarts";
 import JSON from "./assets/520100.json";
 import axios from "axios";
-axios.defaults.baseURL = 'http://10.81.98.200:8082/em';
+// axios.defaults.baseURL = 'http://10.81.98.200:8082/em';
+axios.defaults.baseURL = 'http://10.1.110.112:8086'
 document.title = "贵阳市疫情监控平台";
 
 export default {
@@ -325,7 +326,9 @@ export default {
   },
   methods: {
     widthAbs(event) {
-      return Math.abs(event) < 9 ? Math.abs((event / 11) * 100) + "%" : 82 + "%"
+      let maxNum = this.total_data.maxNum
+      return Math.abs((event / maxNum) * 84) + "%"
+      // return Math.abs(event) < 9 ? Math.abs((event / 11) * 100) + "%" : 82 + "%"
     },
     getTotalData() {
       return axios.get(
