@@ -38,15 +38,15 @@
       <div class="guiyang_data">
         <ol class="case-text">
           <li>
-            确诊病例
+            累计确诊病例
             <span>较昨日人数： {{ total_data.difconfirmedNum }}人</span>
           </li>
           <li>
-            治愈案例
+            累计治愈案例
             <span>较昨日人数： {{ total_data.difcureNum }}人</span>
           </li>
           <li>
-            死亡案例
+            累计死亡案例
             <span>较昨日人数：{{ total_data.difdeathNum }} 人</span>
           </li>
         </ol>
@@ -712,7 +712,7 @@ export default {
             name: "发热人数",
             type: "bar",
             data: [],
-            barWidth: 20, //柱子宽度
+            barWidth: 14, //柱子宽度
             barGap: 0.5, //柱子之间间距
             itemStyle: {
               normal: {
@@ -724,7 +724,7 @@ export default {
             name: "疑似人数",
             type: "bar",
             data: [],
-            barWidth: 20,
+            barWidth: 14,
             barGap: 0.5,
             itemStyle: {
               normal: {
@@ -736,7 +736,7 @@ export default {
             name: "重点患者",
             type: "bar",
             data: [],
-            barWidth: 20,
+            barWidth: 14,
             barGap: 0.5,
             itemStyle: {
               normal: {
